@@ -1,0 +1,2076 @@
+DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TÜRK-PORT AI Command | Stratejik Operasyon Merkezi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --neon-green: #39ff14;
+            --neon-blue: #00d4ff;
+            --neon-red: #ff0040;
+            --neon-orange: #ff8c00;
+            --dark-bg: #020617;
+            --glass-bg: rgba(2, 6, 23, 0.9);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html, body {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--dark-bg);
+            color: #fff;
+            overflow-y: auto;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .orbitron { font-family: 'Orbitron', sans-serif; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 212, 255, 0.1); }
+        ::-webkit-scrollbar-thumb { background: var(--neon-blue); border-radius: 4px; }
+
+        .space-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: 
+                radial-gradient(ellipse at top, rgba(0, 212, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom, rgba(0, 100, 255, 0.1) 0%, transparent 50%),
+                var(--dark-bg);
+            z-index: -2;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 40px 70px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1px 1px at 90px 40px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(2px 2px at 160px 120px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 230px 80px, rgba(255,255,255,0.8), transparent);
+            background-size: 250px 150px;
+            animation: twinkle 5s ease-in-out infinite;
+            z-index: -1;
+        }
+
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: 
+                linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .glass-panel {
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.1), inset 0 0 30px rgba(0, 212, 255, 0.05);
+        }
+
+        .hud-container {
+            position: fixed;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .hud-left { left: 20px; }
+        .hud-right { right: 20px; align-items: flex-end; }
+
+        .hud-bar {
+            width: 10px;
+            height: 200px;
+            background: rgba(0, 212, 255, 0.2);
+            border: 1px solid var(--neon-blue);
+            border-radius: 5px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hud-fill {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, var(--neon-blue), var(--neon-green));
+            transition: height 0.5s ease;
+            box-shadow: 0 0 15px var(--neon-blue);
+        }
+
+        .hud-label {
+            font-size: 10px;
+            color: var(--neon-blue);
+            text-align: center;
+            margin-top: 8px;
+            letter-spacing: 2px;
+        }
+
+        .hud-value {
+            font-size: 14px;
+            color: #fff;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 4px;
+        }
+
+        .terminal {
+            background: rgba(0, 0, 0, 0.95);
+            border: 1px solid var(--neon-green);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
+        }
+
+        .terminal-text {
+            color: var(--neon-green);
+            text-shadow: 0 0 5px var(--neon-green);
+        }
+
+        .mic-btn {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0,212,255,0.2), rgba(0,212,255,0.05));
+            border: 2px solid var(--neon-blue);
+            color: var(--neon-blue);
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+            animation: pulse-cyan 2s infinite;
+        }
+
+        .mic-btn:hover { transform: scale(1.1); box-shadow: 0 0 50px var(--neon-blue); }
+        .mic-btn.recording { background: var(--neon-red); border-color: var(--neon-red); color: #fff; animation: pulse-red 1s infinite; }
+
+        @keyframes pulse-cyan {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 212, 255, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(0, 212, 255, 0.8); }
+        }
+
+        @keyframes pulse-red {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 64, 0.6); }
+            50% { box-shadow: 0 0 40px rgba(255, 0, 64, 1); }
+        }
+
+        .weather-card {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            transition: all 0.3s;
+        }
+
+        .weather-card:hover {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+            transform: translateY(-3px);
+        }
+
+        .map-container { position: relative; overflow: hidden; border: 1px solid rgba(0, 212, 255, 0.3); }
+        .map-container iframe { width: 100%; height: 100%; border: none; filter: grayscale(20%) contrast(1.1) brightness(0.9); }
+
+        .city-btn {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            color: var(--neon-blue);
+            padding: 10px 20px;
+            font-family: 'Orbitron', sans-serif;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .city-btn:hover, .city-btn.active {
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(2, 6, 23, 0.95);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .modal.active { display: flex; }
+
+        .countdown-display {
+            font-size: 8rem;
+            font-weight: 900;
+            text-align: center;
+            text-shadow: 0 0 40px currentColor;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Heat Map Styles */
+        .heat-map-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(180deg, 
+                rgba(0,0,0,0.9) 0%, 
+                rgba(0,50,100,0.8) 20%,
+                rgba(0,100,200,0.6) 40%,
+                rgba(100,200,0,0.5) 60%,
+                rgba(255,200,0,0.6) 80%,
+                rgba(255,50,0,0.8) 100%);
+            border: 1px solid var(--neon-blue);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .heat-grid {
+            display: grid;
+            grid-template-columns: repeat(20, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            width: 100%;
+            height: 100%;
+            gap: 1px;
+        }
+
+        .heat-cell {
+            background: rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+
+        .heat-cell.hot { background: rgba(255, 50, 0, 0.8); box-shadow: 0 0 10px rgba(255, 50, 0, 0.5); }
+        .heat-cell.warm { background: rgba(255, 200, 0, 0.6); }
+        .heat-cell.normal { background: rgba(100, 200, 0, 0.5); }
+        .heat-cell.cool { background: rgba(0, 100, 200, 0.4); }
+        .heat-cell.cold { background: rgba(0, 50, 100, 0.5); }
+
+        .heat-legend {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 8px;
+            font-size: 10px;
+            color: var(--neon-blue);
+        }
+
+        .telemetry-panel {
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--neon-blue);
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .telemetry-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .telemetry-label {
+            font-size: 10px;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-neon {
+            background: linear-gradient(135deg, rgba(0,212,255,0.1), rgba(0,212,255,0.05));
+            border: 1px solid var(--neon-blue);
+            color: var(--neon-blue);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            transition: all 0.3s;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .btn-neon:hover {
+            background: var(--neon-blue);
+            color: var(--dark-bg);
+            box-shadow: 0 0 30px var(--neon-blue);
+        }
+
+        .btn-danger {
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+            background: linear-gradient(135deg, rgba(255,0,64,0.1), rgba(255,0,64,0.05));
+        }
+
+        .btn-danger:hover {
+            background: var(--neon-red);
+            color: #fff;
+            box-shadow: 0 0 30px var(--neon-red);
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
+            animation: blink 2s infinite;
+        }
+
+        .status-green { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+        .status-red { background: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .preflight-check { display: flex; gap: 20px; justify-content: center; margin: 20px 0; }
+
+        .check-item {
+            width: 60px;
+            height: 60px;
+            border: 2px solid var(--neon-blue);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            opacity: 0.3;
+            transition: all 0.3s;
+        }
+
+        .check-item.active { opacity: 1; background: rgba(0, 212, 255, 0.2); box-shadow: 0 0 20px var(--neon-blue); animation: pulse-check 1s infinite; }
+        .check-item.complete { opacity: 1; background: var(--neon-green); border-color: var(--neon-green); color: var(--dark-bg); }
+
+        @keyframes pulse-check {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @media (max-width: 1024px) {
+            .hud-container { display: none; }
+        }
+    
+        /* Thermal Camera Mode */
+        .thermal-mode {
+            filter: sepia(100%) hue-rotate(-30deg) saturate(300%) contrast(150%) brightness(0.9);
+        }
+
+        .thermal-mode .glass-panel {
+            background: rgba(255, 100, 0, 0.15);
+            border-color: rgba(255, 150, 0, 0.5);
+            box-shadow: 0 0 30px rgba(255, 100, 0, 0.3);
+        }
+
+        .thermal-mode .terminal {
+            border-color: #ff6600;
+            box-shadow: 0 0 20px rgba(255, 100, 0, 0.3);
+        }
+
+        .thermal-mode .terminal-text {
+            color: #ff6600;
+            text-shadow: 0 0 5px #ff6600;
+        }
+
+        /* Night Vision Mode */
+        .night-mode {
+            filter: grayscale(100%) sepia(100%) hue-rotate(70deg) saturate(200%) contrast(120%) brightness(0.8);
+        }
+
+        .night-mode .glass-panel {
+            background: rgba(0, 50, 0, 0.9);
+            border-color: rgba(0, 255, 0, 0.5);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
+        }
+
+        .night-mode .terminal {
+            border-color: #00ff41;
+            box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .night-mode .terminal-text {
+            color: #00ff41;
+            text-shadow: 0 0 5px #00ff41;
+        }
+
+        /* Matrix Decrypt Effect */
+        .matrix-text {
+            font-family: 'JetBrains Mono', monospace;
+            color: #0f0;
+            text-shadow: 0 0 5px #0f0;
+        }
+
+        .decrypting {
+            animation: decrypt 1s ease forwards;
+        }
+
+        @keyframes decrypt {
+            0% { opacity: 0; filter: blur(4px); }
+            50% { opacity: 0.5; filter: blur(2px); }
+            100% { opacity: 1; filter: blur(0); }
+        }
+
+        /* Intrusion Detection Alert */
+        .intrusion-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 0, 0, 0.9);
+            border: 2px solid #ff0000;
+            padding: 15px 20px;
+            border-radius: 8px;
+            z-index: 10000;
+            animation: intrusion-pulse 2s infinite;
+            display: none;
+        }
+
+        .intrusion-alert.active {
+            display: block;
+        }
+
+        @keyframes intrusion-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255, 0, 0, 0.8); }
+            50% { box-shadow: 0 0 40px rgba(255, 0, 0, 1); }
+        }
+
+        /* System Lock Overlay */
+        .system-lock {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 99999;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .system-lock.active {
+            display: flex;
+        }
+
+        .lock-timer {
+            font-size: 4rem;
+            color: #ff0000;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 20px #ff0000;
+        }
+
+        /* Moon Phase Display */
+        .moon-phase-container {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 120px;
+            height: 120px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--neon-blue);
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .moon-visual {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(90deg, #444 0%, #fff 50%, #444 100%);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .moon-shadow {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            background: #000;
+            transition: all 0.5s;
+        }
+
+        .moon-label {
+            font-size: 10px;
+            color: var(--neon-blue);
+            text-align: center;
+            margin-top: 8px;
+        }
+
+        /* 2FA Voice Verification */
+        .voice-2fa-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10001;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .voice-2fa-overlay.active {
+            display: flex;
+        }
+
+        .voice-wave {
+            display: flex;
+            gap: 3px;
+            align-items: center;
+            height: 40px;
+        }
+
+        .voice-bar {
+            width: 4px;
+            background: var(--neon-blue);
+            animation: voice-wave 1s ease-in-out infinite;
+        }
+
+        @keyframes voice-wave {
+            0%, 100% { height: 10px; }
+            50% { height: 35px; }
+        }
+
+        /* Kernel Lockdown Warning */
+        .kernel-lockdown {
+            position: fixed;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255, 0, 0, 0.8);
+            color: #fff;
+            padding: 5px 15px;
+            border-radius: 4px;
+            font-size: 10px;
+            z-index: 100;
+            display: none;
+        }
+
+        .kernel-lockdown.active {
+            display: block;
+        }
+
+        /* Log System Indicator */
+        .log-indicator {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--neon-green);
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            color: var(--neon-green);
+            z-index: 50;
+        }
+
+        .log-indicator.recording::before {
+            content: '● ';
+            color: #ff0000;
+            animation: blink 1s infinite;
+        }
+</style>
+
+    <!-- jsPDF and AutoTable for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/3.0.3/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/5.0.2/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- Three.js for 3D Globe -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<base target="_blank">
+<base target="_blank">
+</head>
+<body>
+    <div class="space-bg"></div>
+    <div class="stars"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- HUD Bars -->
+    <div class="hud-container hud-left">
+        <div>
+            <div class="hud-bar"><div class="hud-fill" id="altitude-hud" style="height: 0%"></div></div>
+            <div class="hud-label">İRTİFA</div>
+            <div class="hud-value" id="altitude-value">0 ft</div>
+        </div>
+        <div>
+            <div class="hud-bar"><div class="hud-fill" id="fuel-hud" style="height: 100%"></div></div>
+            <div class="hud-label">YAKIT</div>
+            <div class="hud-value" id="fuel-value">100%</div>
+        </div>
+    </div>
+
+    <div class="hud-container hud-right">
+        <div>
+            <div class="hud-bar"><div class="hud-fill" id="speed-hud" style="height: 0%"></div></div>
+            <div class="hud-label">HIZ</div>
+            <div class="hud-value" id="speed-value">0 mph</div>
+        </div>
+        <div>
+            <div class="hud-bar"><div class="hud-fill" id="temp-hud" style="height: 20%"></div></div>
+            <div class="hud-label">ISI</div>
+            <div class="hud-value" id="temp-value">70°F</div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="relative z-10 min-h-screen p-6">
+
+        <!-- Header -->
+        <header class="glass-panel rounded-lg p-6 mb-6 flex justify-between items-center">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 border-2 border-cyan-400 rounded-lg flex items-center justify-center bg-cyan-900/20">
+                    <span class="orbitron text-2xl font-bold text-cyan-400">T</span>
+                </div>
+                <div>
+                    <h1 class="orbitron text-2xl font-bold text-cyan-400 tracking-wider">TÜRK-PORT AI Command</h1>
+                    <p class="text-sm text-cyan-600">STRATEJİK OPERASYON MERKEZİ v3.0</p>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-6">
+                <div class="text-right">
+                    <div id="clock" class="text-2xl font-bold text-cyan-400 orbitron">00:00:00</div>
+                    <div id="date" class="text-sm text-cyan-600">2026-03-28 UTC</div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="status-dot status-green"></span>
+                    <span class="text-sm text-cyan-400 orbitron">ONLINE</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Map Section (%40) -->
+        <section class="mb-6">
+            <div class="glass-panel rounded-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="orbitron text-lg text-cyan-400 flex items-center gap-2">
+                        <i class="fas fa-map-marked-alt"></i>
+                        TAKTİK HARİTA SİSTEMİ
+                    </h2>
+                    <div class="flex gap-2 overflow-x-auto pb-2" style="max-width: 100%;">
+                        <button onclick="focusCity('mersin')" class="city-btn active" id="btn-mersin">MERSİN</button>
+                        <button onclick="focusCity('antalya')" class="city-btn" id="btn-antalya">ANTALYA</button>
+                        <button onclick="focusCity('adana')" class="city-btn" id="btn-adana">ADANA</button>
+                        <button onclick="focusCity('hatay')" class="city-btn" id="btn-hatay">HATAY</button>
+                        <button onclick="focusCity('izmir')" class="city-btn" id="btn-izmir">İZMİR</button>
+                        <button onclick="focusCity('aydin')" class="city-btn" id="btn-aydin">AYDIN</button>
+                        <button onclick="focusCity('mugla')" class="city-btn" id="btn-mugla">MUĞLA</button>
+                        <button onclick="focusCity('balikesir')" class="city-btn" id="btn-balikesir">BALIKESİR</button>
+                        <button onclick="focusCity('canakkale')" class="city-btn" id="btn-canakkale">ÇANAKKALE</button>
+                        <button onclick="focusCity('edirne')" class="city-btn" id="btn-edirne">EDİRNE</button>
+                        <button onclick="focusCity('istanbul')" class="city-btn" id="btn-istanbul">İSTANBUL</button>
+                        <button onclick="focusCity('tekirdag')" class="city-btn" id="btn-tekirdag">TEKİRDAĞ</button>
+                        <button onclick="focusCity('kocaeli')" class="city-btn" id="btn-kocaeli">KOCAELİ</button>
+                        <button onclick="focusCity('bursa')" class="city-btn" id="btn-bursa">BURSA</button>
+                        <button onclick="focusCity('yalova')" class="city-btn" id="btn-yalova">YALOVA</button>
+                        <button onclick="focusCity('trabzon')" class="city-btn" id="btn-trabzon">TRABZON</button>
+                        <button onclick="focusCity('samsun')" class="city-btn" id="btn-samsun">SAMSUN</button>
+                        <button onclick="focusCity('rize')" class="city-btn" id="btn-rize">RİZE</button>
+                        <button onclick="focusCity('ord')" class="city-btn" id="btn-ord">ORDU</button>
+                        <button onclick="focusCity('giresun')" class="city-btn" id="btn-giresun">GİRESUN</button>
+                        <button onclick="focusCity('zonguldak')" class="city-btn" id="btn-zonguldak">ZONGULDAK</button>
+                        <button onclick="focusCity('sinop')" class="city-btn" id="btn-sinop">SİNOP</button>
+                        <button onclick="focusCity('bartin')" class="city-btn" id="btn-bartin">BARTIN</button>
+                        <button onclick="focusCity('kastamonu')" class="city-btn" id="btn-kastamonu">KASTAMONU</button>
+                        <button onclick="focusCity('duzce')" class="city-btn" id="btn-duzce">DÜZCE</button>
+                        <button onclick="focusCity('sakarya')" class="city-btn" id="btn-sakarya">SAKARYA</button>
+                        <button onclick="focusCity('kirklareli')" class="city-btn" id="btn-kirklareli">KIRKLARELİ</button>
+                    </div>
+                </div>
+                <div class="map-container rounded-lg" style="height: 40vh;">
+                    <iframe id="map-frame" src="https://maps.google.com/maps?q=36.8121,34.6415&z=12&output=embed" allowfullscreen="" loading="lazy"></iframe>
+                    <div class="absolute bottom-4 left-4 glass-panel px-4 py-2 rounded-lg">
+                        <div class="text-xs text-cyan-400">
+                            <i class="fas fa-crosshairs mr-2"></i>
+                            <span id="map-coords">36.8121°N, 34.6415°E</span>
+                        </div>
+                        <div class="text-xs text-cyan-600 mt-1" id="map-location">MERSİN UZAY LİMANI</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Weather & Telemetry Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+
+            <!-- 7-Day Weather -->
+            <div class="lg:col-span-2 glass-panel rounded-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="orbitron text-lg text-cyan-400 flex items-center gap-2">
+                        <i class="fas fa-cloud-sun"></i>
+                        7 GÜNLÜK METEOROLOJİ
+                    </h2>
+                    <div class="flex items-center gap-3">
+                        <span id="weather-city" class="text-cyan-400 font-bold orbitron">MERSİN</span>
+                    </div>
+                </div>
+                <div id="weather-container" class="grid grid-cols-7 gap-2">
+                    <!-- Weather cards populated by JS -->
+                </div>
+
+                <!-- Heat Map -->
+                <div class="mt-4">
+                    <h3 class="text-sm text-cyan-400 mb-2 orbitran"><i class="fas fa-fire mr-2"></i>TERMAL ISI HARİTASI</h3>
+                    <div class="heat-map-container">
+                        <div class="heat-grid" id="heat-grid"></div>
+                    </div>
+                    <div class="heat-legend">
+                        <span>Soğuk (< 0°C)</span>
+                        <span>Serin (0-10°C)</span>
+                        <span>Ilık (10-20°C)</span>
+                        <span>Sıcak (20-30°C)</span>
+                        <span>Çok Sıcak (> 30°C)</span>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-cyan-500/30 flex justify-between text-xs">
+                    <span class="text-cyan-600">Kaynak: OpenWeather API</span>
+                    <span id="last-update" class="text-cyan-400">Son Güncelleme: --:--</span>
+                </div>
+            </div>
+
+            <!-- Live Telemetry (Spacecraft) -->
+            <div class="glass-panel rounded-lg p-4">
+                <h2 class="orbitron text-lg text-cyan-400 flex items-center gap-2 mb-4">
+                    <i class="fas fa-rocket"></i>
+                    CANLI TELEMETRİ
+                </h2>
+                <div id="telemetry-panel" class="space-y-3">
+                    <div class="telemetry-panel">
+                        <div class="telemetry-label">İRTİFA (FT)</div>
+                        <div class="telemetry-value" id="tele-alt">0</div>
+                        <div class="text-xs text-cyan-600 mt-1">Hedef: 1,320,000 ft</div>
+                    </div>
+                    <div class="telemetry-panel">
+                        <div class="telemetry-label">HIZ (MPH)</div>
+                        <div class="telemetry-value" id="tele-speed">0</div>
+                        <div class="text-xs text-cyan-600 mt-1">Hedef: 17,500 mph</div>
+                    </div>
+                    <div class="telemetry-panel">
+                        <div class="telemetry-label">YAKIT (%)</div>
+                        <div class="telemetry-value" id="tele-fuel">100</div>
+                        <div class="w-full bg-gray-800 rounded-full h-2 mt-2">
+                            <div class="bg-cyan-400 h-2 rounded-full" id="fuel-bar" style="width: 100%"></div>
+                        </div>
+                    </div>
+                    <div class="telemetry-panel">
+                        <div class="telemetry-label">G-KUVVETİ</div>
+                        <div class="telemetry-value" id="tele-g">1.0</div>
+                        <div class="text-xs text-cyan-600 mt-1">Maks: 3.0 G</div>
+                    </div>
+                    <div class="telemetry-panel">
+                        <div class="telemetry-label">MOTOR ISI (°F)</div>
+                        <div class="telemetry-value text-orange-400" id="tele-temp">450</div>
+                        <div class="text-xs text-orange-600 mt-1">Nominal: 400-600°F</div>
+                    </div>
+                </div>
+
+                <div class="mt-4 p-3 bg-black/50 rounded border border-cyan-500/30">
+                    <div class="text-xs text-cyan-400 mb-2">UZAY MEKİĞİ DURUMU:</div>
+                    <div id="spacecraft-status" class="text-green-400 font-bold">BEKLEMEDE</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Terminal Section -->
+        <section class="glass-panel rounded-lg p-4">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="orbitron text-lg text-green-400 flex items-center gap-2">
+                    <i class="fas fa-terminal"></i>
+                    AI OPERATÖR MODÜLÜ
+                </h2>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-gray-400">Sesli Komut:</span>
+                    <button id="mic-btn" class="mic-btn" onclick="toggleVoiceCommand()">
+                        <i class="fas fa-microphone"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+                <!-- Terminal Output -->
+                <div class="lg:col-span-3 terminal rounded-lg p-4 h-64 overflow-y-auto" id="terminal-output">
+                    <div class="terminal-text text-sm space-y-2">
+                        <div class="terminal-line text-cyan-400">[TUA-SYSTEM] Stratejik Komuta Merkezi v3.0 başlatıldı...</div>
+                        <div class="terminal-line text-cyan-400">[TUA-SYSTEM] Tüm sistemler nominal. Operatör bekleniyor...</div>
+                        <div class="terminal-line text-green-400">[AI] Operatör, TUA Astro sistemine hoş geldiniz. Komutlarınızı bekliyorum.</div>
+                        <div class="terminal-line text-gray-500">---</div>
+                        <div class="terminal-line text-cyan-400/70">Mevcut komutlar:</div>
+                        <div class="terminal-line text-cyan-400/70">• "Mersin'den uçuş başlat" - Fırlatma protokolü</div>
+                        <div class="terminal-line text-cyan-400/70">• "Tüm şehirlerin hava durumu" - Genel rapor</div>
+                        <div class="terminal-line text-cyan-400/70">• "Antalya uçuş raporu ver" - Şehir analizi</div>
+                        <div class="terminal-line text-cyan-400/70">• "Peugeot 3008 fiyatları" - Araç bilgisi</div>
+                    </div>
+                </div>
+
+                <!-- Quick Commands -->
+                <div class="space-y-2">
+                    <button onclick="quickCommand('Mersin\'den uçuş başlat')" class="btn-neon w-full px-4 py-3 rounded text-left text-sm">
+                        <i class="fas fa-rocket mr-2"></i>Uçuş Başlat
+                    </button>
+                    <button onclick="quickCommand('Tüm şehirlerin hava durumu')" class="btn-neon w-full px-4 py-3 rounded text-left text-sm">
+                        <i class="fas fa-cloud-sun mr-2"></i>Tüm Şehirler
+                    </button>
+                    <button onclick="quickCommand('Antalya uçuş raporu ver')" class="btn-neon w-full px-4 py-3 rounded text-left text-sm">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Uçuş Raporu
+                    </button>
+                    <button onclick="quickCommand('Peugeot 3008 fiyatları')" class="btn-neon w-full px-4 py-3 rounded text-left text-sm">
+                        <i class="fas fa-car mr-2"></i>Peugeot 3008
+                    </button>
+                    <button onclick="generateFlightReportPDF()" class="btn-neon w-full px-4 py-3 rounded text-left text-sm border-yellow-500 text-yellow-400 hover:bg-yellow-500/20">
+                        <i class="fas fa-file-pdf mr-2"></i>PDF Rapor İndir
+                    </button>
+                    <button onclick="clearTerminal()" class="w-full px-4 py-2 rounded text-left text-sm border border-gray-600 text-gray-400 hover:bg-gray-800">
+                        <i class="fas fa-trash mr-2"></i>Temizle
+                    </button>
+                </div>
+            </div>
+
+            <!-- Command Input -->
+            <div class="mt-4 flex gap-3">
+                <span class="terminal-text self-center text-lg">➜</span>
+                <input 
+                    type="text" 
+                    id="command-input" 
+                    placeholder="Komut girin, Operatör... (örn: 'Mersin'den uçuş başlat')"
+                    class="flex-1 bg-transparent border border-cyan-500/30 rounded px-4 py-2 terminal-text text-sm outline-none focus:border-cyan-400"
+                    onkeypress="handleKeyPress(event)"
+                >
+                <button onclick="processCommand()" class="btn-neon px-6 py-2 rounded">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </section>
+
+        <footer class="mt-6 text-center text-xs text-cyan-600">
+            <p>TÜRKİYE UZAY AJANSI (TUA) | ASTRO STRATEJİK KOMUTA MERKEZİ | SINIFLANDIRILMIŞ - GÖZLER ONLY</p>
+        </footer>
+    </div>
+
+    <!-- Modals -->
+    <div id="preflight-modal" class="modal">
+        <div class="glass-panel p-8 rounded-lg text-center max-w-lg w-full mx-4">
+            <h2 class="orbitron text-2xl text-cyan-400 mb-6">PRE-FLIGHT CHECK</h2>
+            <div class="preflight-check" id="preflight-items">
+                <div class="check-item" id="check-1"><i class="fas fa-microchip"></i></div>
+                <div class="check-item" id="check-2"><i class="fas fa-battery-full"></i></div>
+                <div class="check-item" id="check-3"><i class="fas fa-satellite-dish"></i></div>
+                <div class="check-item" id="check-4"><i class="fas fa-wind"></i></div>
+            </div>
+            <div id="preflight-status" class="text-cyan-400 mt-4 orbitron">Sistem Kontrolü Başlatılıyor...</div>
+        </div>
+    </div>
+
+    <div id="weather-cancel-modal" class="modal">
+        <div class="glass-panel p-8 rounded-lg text-center max-w-md w-full mx-4 border-red-500/50">
+            <div class="text-6xl mb-4">⚠️</div>
+            <h2 class="orbitron text-2xl text-red-400 mb-4">UÇUŞ İPTAL</h2>
+            <p class="text-gray-300 mb-2">Hava Koşulları Elverişsiz</p>
+            <p id="cancel-reason" class="text-red-400 text-sm mb-6">Rüzgar hızı 25km/h üzerinde</p>
+            <button onclick="closeWeatherCancel()" class="btn-neon px-6 py-3 rounded">ANLAŞILDI</button>
+        </div>
+    </div>
+
+    <div id="countdown-modal" class="modal">
+        <div class="glass-panel p-8 rounded-lg text-center max-w-md w-full mx-4">
+            <div class="text-6xl mb-4">🚀</div>
+            <h2 class="orbitron text-2xl text-cyan-400 mb-4">FIRLATMA DİZİSİ</h2>
+            <div id="countdown-display" class="countdown-display text-cyan-400 mb-6">05</div>
+            <div class="flex gap-4 justify-center">
+                <button onclick="abortLaunch()" class="btn-danger px-6 py-3 rounded"><i class="fas fa-ban mr-2"></i>ABORT</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="success-modal" class="modal">
+        <div class="glass-panel p-8 rounded-lg text-center max-w-lg w-full mx-4">
+            <div class="text-8xl mb-4">✅</div>
+            <h2 class="orbitron text-3xl text-green-400 mb-4">ATEŞLEME BAŞARILI</h2>
+            <p class="text-cyan-400 text-xl mb-2 orbitron">OPERATÖR</p>
+            <p class="text-gray-400 mb-8">Uzay mekiği yörüngeye başarıyla yerleştirildi.</p>
+            <div class="grid grid-cols-3 gap-4 mb-6">
+                <div class="bg-cyan-900/30 p-3 rounded">
+                    <div class="text-xs text-cyan-600">İRTİFA</div>
+                    <div class="text-xl font-bold text-cyan-400" id="final-alt">1,320,000 ft</div>
+                </div>
+                <div class="bg-cyan-900/30 p-3 rounded">
+                    <div class="text-xs text-cyan-600">HIZ</div>
+                    <div class="text-xl font-bold text-cyan-400" id="final-speed">17,500 mph</div>
+                </div>
+                <div class="bg-cyan-900/30 p-3 rounded">
+                    <div class="text-xs text-cyan-600">YÖRÜNGE</div>
+                    <div class="text-xl font-bold text-cyan-400">LEO</div>
+                </div>
+            </div>
+            <button onclick="resetSystem()" class="btn-neon px-8 py-3 rounded"><i class="fas fa-redo mr-2"></i>YENİ GÖREV</button>
+        </div>
+    </div>
+
+    <script>
+
+        // ==========================================
+        // TÜRK-PORT AI Command v3.0 - Enhanced
+        // ==========================================
+
+        const cities = {
+            // Akdeniz Bölgesi
+            mersin: { name: 'MERSİN', lat: 36.8121, lon: 34.6415, baseTemp: 22, baseWind: 15, location: 'MERSİN UZAY LİMANI', region: 'Akdeniz' },
+            antalya: { name: 'ANTALYA', lat: 36.8969, lon: 30.7133, baseTemp: 24, baseWind: 12, location: 'ANTALYA UZAY ÜSSÜ', region: 'Akdeniz' },
+            adana: { name: 'ADANA', lat: 37.0033, lon: 35.3263, baseTemp: 23, baseWind: 14, location: 'ADANA UZAY ÜSSÜ', region: 'Akdeniz' },
+            hatay: { name: 'HATAY', lat: 36.2177, lon: 36.1654, baseTemp: 21, baseWind: 13, location: 'HATAY UZAY LİMANI', region: 'Akdeniz' },
+
+            // Ege Bölgesi
+            izmir: { name: 'İZMİR', lat: 38.4192, lon: 27.1287, baseTemp: 19, baseWind: 16, location: 'İZMİR UZAY LİMANI', region: 'Ege' },
+            aydin: { name: 'AYDIN', lat: 37.8459, lon: 27.8338, baseTemp: 20, baseWind: 14, location: 'AYDIN UZAY ÜSSÜ', region: 'Ege' },
+            mugla: { name: 'MUĞLA', lat: 37.1642, lon: 28.2624, baseTemp: 21, baseWind: 13, location: 'MUĞLA UZAY LİMANI', region: 'Ege' },
+            balikesir: { name: 'BALIKESİR', lat: 39.6470, lon: 27.8856, baseTemp: 17, baseWind: 19, location: 'BALIKESİR UZAY ÜSSÜ', region: 'Ege' },
+            canakkale: { name: 'ÇANAKKALE', lat: 40.1501, lon: 26.4149, baseTemp: 16, baseWind: 20, location: 'ÇANAKKALE BOĞAZ ÜSSÜ', region: 'Ege' },
+            edirne: { name: 'EDİRNE', lat: 41.6759, lon: 26.5587, baseTemp: 15, baseWind: 18, location: 'EDİRNE UZAY ÜSSÜ', region: 'Ege' },
+
+            // Marmara Bölgesi
+            istanbul: { name: 'İSTANBUL', lat: 41.0082, lon: 28.9784, baseTemp: 15, baseWind: 22, location: 'İSTANBUL TUA MERKEZ', region: 'Marmara' },
+            tekirdag: { name: 'TEKİRDAĞ', lat: 41.1186, lon: 27.4144, baseTemp: 14, baseWind: 21, location: 'TEKİRDAĞ UZAY LİMANI', region: 'Marmara' },
+            kocaeli: { name: 'KOCAELİ', lat: 40.8217, lon: 29.9507, baseTemp: 15, baseWind: 19, location: 'KOCAELİ UZAY ÜSSÜ', region: 'Marmara' },
+            bursa: { name: 'BURSA', lat: 40.1827, lon: 29.0668, baseTemp: 16, baseWind: 17, location: 'BURSA UZAY ARAŞTIRMA', region: 'Marmara' },
+            yalova: { name: 'YALOVA', lat: 40.6292, lon: 29.2500, baseTemp: 16, baseWind: 16, location: 'YALOVA UZAY LİMANI', region: 'Marmara' },
+
+            // Karadeniz Bölgesi
+            trabzon: { name: 'TRABZON', lat: 41.0027, lon: 39.7168, baseTemp: 14, baseWind: 28, location: 'TRABZON KARADENİZ ÜSSÜ', region: 'Karadeniz' },
+            samsun: { name: 'SAMSUN', lat: 41.2894, lon: 36.3259, baseTemp: 13, baseWind: 26, location: 'SAMSUN UZAY LİMANI', region: 'Karadeniz' },
+            rize: { name: 'RİZE', lat: 40.9348, lon: 40.8271, baseTemp: 13, baseWind: 30, location: 'RİZE UZAY ÜSSÜ', region: 'Karadeniz' },
+            ord: { name: 'ORDU', lat: 40.8293, lon: 37.4083, baseTemp: 14, baseWind: 25, location: 'ORDU UZAY LİMANI', region: 'Karadeniz' },
+            giresun: { name: 'GİRESUN', lat: 40.9149, lon: 38.3879, baseTemp: 14, baseWind: 27, location: 'GİRESUN UZAY ÜSSÜ', region: 'Karadeniz' },
+            zonguldak: { name: 'ZONGULDAK', lat: 41.2503, lon: 31.8390, baseTemp: 12, baseWind: 24, location: 'ZONGULDAK UZAY LİMANI', region: 'Karadeniz' },
+            sinop: { name: 'SİNOP', lat: 42.0267, lon: 35.1507, baseTemp: 11, baseWind: 29, location: 'SİNOP UZAY ÜSSÜ', region: 'Karadeniz' },
+            bartin: { name: 'BARTIN', lat: 41.4948, lon: 32.4354, baseTemp: 12, baseWind: 23, location: 'BARTIN UZAY LİMANI', region: 'Karadeniz' },
+            kastamonu: { name: 'KASTAMONU', lat: 41.3765, lon: 33.7770, baseTemp: 11, baseWind: 22, location: 'KASTAMONU UZAY ÜSSÜ', region: 'Karadeniz' },
+            duzce: { name: 'DÜZCE', lat: 40.8775, lon: 31.2010, baseTemp: 13, baseWind: 20, location: 'DÜZCE UZAY ARAŞTIRMA', region: 'Karadeniz' },
+            sakarya: { name: 'SAKARYA', lat: 40.7732, lon: 30.4816, baseTemp: 14, baseWind: 21, location: 'SAKARYA UZAY LİMANI', region: 'Karadeniz' },
+            kirklareli: { name: 'KIRKLARELİ', lat: 41.7078, lon: 27.6051, baseTemp: 13, baseWind: 19, location: 'KIRKLARELİ UZAY ÜSSÜ', region: 'Karadeniz' }
+        };
+
+        let currentCity = 'mersin';
+        let recognition = null;
+        let isRecording = false;
+        let countdownInterval = null;
+        let preflightInterval = null;
+        let telemetryInterval = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            updateClock();
+            setInterval(updateClock, 1000);
+            loadWeatherData(currentCity);
+            initHeatMap();
+            initSpeechRecognition();
+
+            // Auto-scroll terminal
+            const terminal = document.getElementById('terminal-output');
+            const observer = new MutationObserver(() => {
+                terminal.scrollTop = terminal.scrollHeight;
+            });
+            observer.observe(terminal.querySelector('.terminal-text'), { childList: true });
+        });
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').textContent = now.toLocaleTimeString('tr-TR', { hour12: false });
+            document.getElementById('date').textContent = now.toISOString().split('T')[0] + ' UTC';
+        }
+
+        // Heat Map Initialization
+        function initHeatMap() {
+            const grid = document.getElementById('heat-grid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < 200; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'heat-cell';
+                cell.id = `heat-cell-${i}`;
+                grid.appendChild(cell);
+            }
+
+            updateHeatMap();
+        }
+
+        function updateHeatMap() {
+            const city = cities[currentCity];
+            const baseTemp = city.baseTemp;
+
+            for (let i = 0; i < 200; i++) {
+                const cell = document.getElementById(`heat-cell-${i}`);
+                const randomTemp = baseTemp + Math.random() * 10 - 5;
+
+                cell.className = 'heat-cell';
+                if (randomTemp > 30) cell.classList.add('hot');
+                else if (randomTemp > 20) cell.classList.add('warm');
+                else if (randomTemp > 10) cell.classList.add('normal');
+                else if (randomTemp > 0) cell.classList.add('cool');
+                else cell.classList.add('cold');
+            }
+        }
+
+        function focusCity(cityKey) {
+            currentCity = cityKey;
+            const city = cities[cityKey];
+
+            const mapFrame = document.getElementById('map-frame');
+            mapFrame.style.opacity = '0';
+
+            setTimeout(() => {
+                mapFrame.src = `https://maps.google.com/maps?q=${city.lat},${city.lon}&z=12&output=embed`;
+                mapFrame.onload = () => {
+                    mapFrame.style.opacity = '1';
+                    mapFrame.style.transition = 'opacity 0.5s';
+                };
+            }, 300);
+
+            document.getElementById('map-coords').textContent = `${city.lat}°N, ${city.lon}°E`;
+            document.getElementById('map-location').textContent = city.location;
+            document.getElementById('weather-city').textContent = city.name;
+
+            document.querySelectorAll('.city-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`btn-${cityKey}`).classList.add('active');
+
+            loadWeatherData(cityKey);
+            updateHeatMap();
+
+            addTerminalLine(`[AI] Operatör, ${city.name} üssüne geçiş yapıldı.`, 'green');
+            addTerminalLine(`[AI] Koordinatlar: ${city.lat}°N, ${city.lon}°E`, 'cyan');
+        }
+
+        function loadWeatherData(cityKey) {
+            const container = document.getElementById('weather-container');
+            const city = cities[cityKey];
+            const weatherData = generateWeatherData(city);
+
+            container.innerHTML = weatherData.map((day, index) => `
+                <div class="weather-card rounded-lg p-3 flex flex-col items-center text-center ${index === 0 ? 'border-cyan-400 bg-cyan-900/20' : ''}">
+                    <div class="text-xs text-cyan-400 font-bold orbitron mb-2">${day.day}</div>
+                    <div class="text-3xl mb-2">${day.icon}</div>
+                    <div class="text-xl font-bold text-white orbitron">${day.temp}°</div>
+                    <div class="text-xs text-gray-400 mt-1">${day.condition}</div>
+                    <div class="w-full mt-3 space-y-1 text-xs">
+                        <div class="flex justify-between text-cyan-600">
+                            <span><i class="fas fa-tint mr-1"></i>${day.humidity}%</span>
+                        </div>
+                        <div class="flex justify-between ${day.wind > 25 ? 'text-red-400' : 'text-cyan-600'}">
+                            <span><i class="fas fa-wind mr-1"></i>${day.wind}km/h</span>
+                        </div>
+                        <div class="flex justify-between ${day.rain > 50 ? 'text-red-400' : 'text-cyan-600'}">
+                            <span><i class="fas fa-cloud-rain mr-1"></i>${day.rain}%</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('last-update').textContent = `Son Güncelleme: ${new Date().toLocaleTimeString('tr-TR', {hour: '2-digit', minute: '2-digit'})}`;
+        }
+
+        function generateWeatherData(city) {
+            const days = ['Pzt', 'Sal', 'Çar', 'Per', 'Cum', 'Cmt', 'Paz'];
+            const conditions = [
+                { icon: '☀️', text: 'Güneşli', rain: 0 },
+                { icon: '⛅', text: 'Parçalı', rain: 20 },
+                { icon: '☁️', text: 'Bulutlu', rain: 40 },
+                { icon: '🌧️', text: 'Yağmurlu', rain: 80 },
+                { icon: '⛈️', text: 'Fırtına', rain: 90 }
+            ];
+
+            return days.map((day, index) => {
+                const temp = city.baseTemp + Math.floor(Math.random() * 8 - 4);
+                const wind = city.baseWind + Math.floor(Math.random() * 15 - 5);
+                const humidity = 45 + Math.floor(Math.random() * 35);
+
+                let conditionIndex = 0;
+                const rainProb = Math.random() * 100;
+                if (rainProb > 80) conditionIndex = 4;
+                else if (rainProb > 60) conditionIndex = 3;
+                else if (rainProb > 40) conditionIndex = 2;
+                else if (rainProb > 20) conditionIndex = 1;
+
+                const condition = conditions[conditionIndex];
+
+                return {
+                    day: index === 0 ? 'Bugün' : day,
+                    temp: temp,
+                    icon: condition.icon,
+                    condition: condition.text,
+                    humidity: humidity,
+                    wind: wind,
+                    rain: Math.max(0, condition.rain + Math.floor(Math.random() * 20 - 10))
+                };
+            });
+        }
+
+        function addTerminalLine(text, color = 'green') {
+            const terminal = document.querySelector('#terminal-output .terminal-text');
+            const line = document.createElement('div');
+            line.className = 'terminal-line';
+
+            const colors = {
+                green: 'text-[#39ff14]',
+                cyan: 'text-cyan-400',
+                red: 'text-red-400',
+                yellow: 'text-yellow-400',
+                gray: 'text-gray-400'
+            };
+
+            line.classList.add(colors[color] || colors.green);
+            line.textContent = text;
+            terminal.appendChild(line);
+
+            const output = document.getElementById('terminal-output');
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearTerminal() {
+            const terminal = document.querySelector('#terminal-output .terminal-text');
+            terminal.innerHTML = `
+                <div class="terminal-line text-gray-500">[TUA-SYSTEM] Terminal temizlendi.</div>
+                <div class="terminal-line text-cyan-400/70">Mevcut komutlar:</div>
+                <div class="terminal-line text-cyan-400/70">• "Mersin'den uçuş başlat" - Fırlatma protokolü</div>
+                <div class="terminal-line text-cyan-400/70">• "Tüm şehirlerin hava durumu" - Genel rapor</div>
+                <div class="terminal-line text-cyan-400/70">• "Antalya uçuş raporu ver" - Şehir analizi</div>
+                <div class="terminal-line text-cyan-400/70">• "Peugeot 3008 fiyatları" - Araç bilgisi</div>
+            `;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') processCommand();
+        }
+
+        function quickCommand(cmd) {
+            document.getElementById('command-input').value = cmd;
+            processCommand();
+        }
+
+        function processCommand() {
+            const input = document.getElementById('command-input');
+            const cmd = input.value.trim();
+            if (!cmd) return;
+
+            addTerminalLine(`[OPERATÖR] ${cmd}`, 'cyan');
+            input.value = '';
+            processAICommand(cmd);
+        }
+
+        function processAICommand(cmd) {
+            const lowerCmd = cmd.toLowerCase();
+
+            // All cities weather report
+            if (lowerCmd.includes('tüm şehirler') || lowerCmd.includes('genel rapor')) {
+                addTerminalLine(`[AI] Operatör, tüm üslerin hava durumu raporu hazırlanıyor...`, 'cyan');
+
+                Object.keys(cities).forEach((cityKey, index) => {
+                    setTimeout(() => {
+                        const city = cities[cityKey];
+                        const weather = generateWeatherData(city)[0];
+
+                        let status = '✓ UYGUN';
+                        let statusColor = 'green';
+                        if (weather.wind > 25) { status = '✗ RİSKLİ'; statusColor = 'red'; }
+                        else if (weather.wind > 20) { status = '⚠ DİKKAT'; statusColor = 'yellow'; }
+
+                        addTerminalLine(`[AI] ${city.name}: ${weather.temp}°C, Rüzgar ${weather.wind}km/h ${status}`, statusColor);
+                    }, index * 500);
+                });
+
+                setTimeout(() => {
+                    addTerminalLine(`[AI] Rapor tamamlandı, Operatör.`, 'green');
+                }, Object.keys(cities).length * 500 + 500);
+                return;
+            }
+
+            // Launch command
+            if (lowerCmd.includes('uçuş başlat') || lowerCmd.includes('fırlatma')) {
+                let targetCity = currentCity;
+                Object.keys(cities).forEach(key => {
+                    if (lowerCmd.includes(key)) targetCity = key;
+                });
+
+                if (targetCity !== currentCity) focusCity(targetCity);
+
+                setTimeout(() => {
+                    const city = cities[targetCity];
+                    const weather = generateWeatherData(city)[0];
+
+                    if (weather.wind > 25) {
+                        addTerminalLine(`[AI] UYARI: ${city.name} için rüzgar hızı ${weather.wind}km/h!`, 'red');
+                        addTerminalLine(`[AI] Operatör, uçuş güvenlik limiti aşıldı.`, 'red');
+                        setTimeout(() => showWeatherCancel(weather.wind), 1000);
+                        return;
+                    }
+
+                    addTerminalLine(`[AI] Operatör, ${city.name} fırlatma protokolü başlatılıyor...`, 'green');
+                    startPreFlightCheck();
+                }, 500);
+            }
+
+            // Weather report
+            else if (lowerCmd.includes('uçuş raporu') || lowerCmd.includes('hava durumu')) {
+                let targetCity = currentCity;
+                Object.keys(cities).forEach(key => {
+                    if (lowerCmd.includes(key)) targetCity = key;
+                });
+
+                if (targetCity !== currentCity) focusCity(targetCity);
+
+                setTimeout(() => {
+                    const city = cities[targetCity];
+                    const weather = generateWeatherData(city)[0];
+
+                    addTerminalLine(`[AI] ${city.name} Uçuş Raporu:`, 'cyan');
+                    addTerminalLine(`[AI] Sıcaklık: ${weather.temp}°C, Nem: ${weather.humidity}%`, 'green');
+                    addTerminalLine(`[AI] Rüzgar: ${weather.wind} km/h, Yağış: ${weather.rain}%`, 'green');
+
+                    if (weather.wind > 25 || weather.rain > 60) {
+                        addTerminalLine(`[AI] DURUM: Uçuş için elverişsiz!`, 'red');
+                    } else if (weather.wind > 20 || weather.rain > 40) {
+                        addTerminalLine(`[AI] DURUM: Dikkat gerekli`, 'yellow');
+                    } else {
+                        addTerminalLine(`[AI] DURUM: Hava nominal, uçuşa uygun`, 'green');
+                    }
+                }, 600);
+            }
+
+            // Peugeot 3008
+            else if (lowerCmd.includes('peugeot') || lowerCmd.includes('3008')) {
+                addTerminalLine(`[AI] Peugeot 3008 Güncel Fiyat Analizi (Türkiye):`, 'cyan');
+                addTerminalLine(`[AI] 2025 Model Sıfır: ~2.600.000 TL`, 'green');
+                addTerminalLine(`[AI] 2024 Model 2. El: 1.500.000 - 2.100.000 TL`, 'green');
+                addTerminalLine(`[AI] 2023 Model 2. El: 1.300.000 - 1.800.000 TL`, 'green');
+                addTerminalLine(`[AI] Not: Fiyatlar donanım ve kilometreye göre değişir.`, 'yellow');
+            }
+
+            // Help
+            else if (lowerCmd.includes('yardım') || lowerCmd.includes('help')) {
+                addTerminalLine(`[AI] Mevcut komutlar, Operatör:`, 'cyan');
+                addTerminalLine(`[AI] • "Mersin'den uçuş başlat" - Fırlatma protokolü`, 'green');
+                addTerminalLine(`[AI] • "Tüm şehirlerin hava durumu" - Genel rapor`, 'green');
+                addTerminalLine(`[AI] • "Antalya uçuş raporu ver" - Şehir analizi`, 'green');
+                addTerminalLine(`[AI] • "Peugeot 3008 fiyatları" - Araç bilgisi`, 'green');
+            }
+
+            else {
+                addTerminalLine(`[AI] Komut anlaşıldı, Operatör: "${cmd}"`, 'cyan');
+                addTerminalLine(`[AI] İşlem yapılıyor...`, 'green');
+                setTimeout(() => addTerminalLine(`[AI] İşlem tamamlandı.`, 'green'), 1000);
+            }
+        }
+
+        function initSpeechRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                recognition = new SpeechRecognition();
+                recognition.lang = 'tr-TR';
+                recognition.continuous = false;
+                recognition.interimResults = false;
+
+                recognition.onstart = () => {
+                    isRecording = true;
+                    document.getElementById('mic-btn').classList.add('recording');
+                    addTerminalLine(`[SYSTEM] Sesli komut dinleniyor...`, 'cyan');
+                };
+
+                recognition.onend = () => {
+                    isRecording = false;
+                    document.getElementById('mic-btn').classList.remove('recording');
+                };
+
+                recognition.onresult = (event) => {
+                    const command = event.results[0][0].transcript;
+                    addTerminalLine(`[OPERATÖR] ${command}`, 'cyan');
+                    processAICommand(command);
+                };
+
+                recognition.onerror = (event) => {
+                    addTerminalLine(`[ERROR] Ses tanıma hatası: ${event.error}`, 'red');
+                };
+            } else {
+                addTerminalLine(`[WARNING] Tarayıcı sesli komutu desteklemiyor.`, 'yellow');
+                document.getElementById('mic-btn').style.display = 'none';
+            }
+        }
+
+        function toggleVoiceCommand() {
+            if (!recognition) {
+                addTerminalLine(`[ERROR] Sesli komut sistemi hazır değil.`, 'red');
+                return;
+            }
+            if (isRecording) recognition.stop();
+            else recognition.start();
+        }
+
+        function startPreFlightCheck() {
+            const modal = document.getElementById('preflight-modal');
+            modal.classList.add('active');
+
+            const checks = [
+                { id: 'check-1', name: 'Sistem Kontrolü', delay: 0 },
+                { id: 'check-2', name: 'Yakıt Seviyesi', delay: 800 },
+                { id: 'check-3', name: 'İletişim Sistemleri', delay: 1600 },
+                { id: 'check-4', name: 'Hava Durumu', delay: 2400 }
+            ];
+
+            checks.forEach(check => {
+                document.getElementById(check.id).className = 'check-item';
+            });
+
+            document.getElementById('preflight-status').textContent = 'Sistem Kontrolü Başlatılıyor...';
+
+            checks.forEach((check, index) => {
+                setTimeout(() => {
+                    document.getElementById(check.id).classList.add('active');
+                    document.getElementById('preflight-status').textContent = `${check.name} kontrol ediliyor...`;
+
+                    setTimeout(() => {
+                        document.getElementById(check.id).classList.remove('active');
+                        document.getElementById(check.id).classList.add('complete');
+
+                        if (index === checks.length - 1) {
+                            setTimeout(() => {
+                                modal.classList.remove('active');
+                                addTerminalLine(`[AI] Pre-flight check tamamlandı.`, 'green');
+                                addTerminalLine(`[AI] Tüm sistemler GO. Geri sayım başlatılıyor...`, 'green');
+                                startCountdown();
+                            }, 500);
+                        }
+                    }, 600);
+                }, check.delay);
+            });
+        }
+
+        function showWeatherCancel(windSpeed) {
+            document.getElementById('cancel-reason').textContent = `Rüzgar hızı ${windSpeed}km/h (Limit: 25km/h)`;
+            document.getElementById('weather-cancel-modal').classList.add('active');
+        }
+
+        function closeWeatherCancel() {
+            document.getElementById('weather-cancel-modal').classList.remove('active');
+        }
+
+        function startCountdown() {
+            const modal = document.getElementById('countdown-modal');
+            const display = document.getElementById('countdown-display');
+            modal.classList.add('active');
+
+            let count = 5;
+            display.textContent = '05';
+
+            document.getElementById('spacecraft-status').textContent = 'FIRLATMA HAZIRLIĞI';
+            document.getElementById('spacecraft-status').className = 'text-yellow-400 font-bold';
+
+            countdownInterval = setInterval(() => {
+                count--;
+                display.textContent = count < 10 ? '0' + count : count;
+
+                // Update telemetry during countdown
+                const fuel = 100 - (5 - count) * 15;
+                document.getElementById('tele-fuel').textContent = fuel;
+                document.getElementById('fuel-bar').style.width = fuel + '%';
+                document.getElementById('fuel-hud').style.height = fuel + '%';
+                document.getElementById('fuel-value').textContent = fuel + '%';
+
+                // Engine temp rises
+                const temp = 450 + (5 - count) * 50;
+                document.getElementById('tele-temp').textContent = temp;
+                document.getElementById('temp-hud').style.height = Math.min(100, (temp / 800) * 100) + '%';
+                document.getElementById('temp-value').textContent = temp + '°F';
+
+                if (count <= 0) {
+                    clearInterval(countdownInterval);
+                    modal.classList.remove('active');
+                    startLaunchSimulation();
+                }
+            }, 1000);
+        }
+
+        function startLaunchSimulation() {
+            document.getElementById('spacecraft-status').textContent = 'FIRLATMA BAŞARILI';
+            document.getElementById('spacecraft-status').className = 'text-green-400 font-bold';
+
+            addTerminalLine(`[AI] 🔥 ATEŞLEME BAŞARILI OPERATÖR!`, 'green');
+            addTerminalLine(`[AI] Uzay mekiği yörüngeye yerleştirildi.`, 'green');
+
+            // Simulate telemetry
+            let altitude = 0; // feet
+            let speed = 0; // mph
+            let gForce = 1.0;
+            let fuel = 25;
+
+            telemetryInterval = setInterval(() => {
+                altitude += 20000; // feet
+                speed += 500; // mph
+                gForce = Math.min(3.0, gForce + 0.1);
+                fuel = Math.max(0, fuel - 2);
+
+                // Update telemetry panel
+                document.getElementById('tele-alt').textContent = altitude.toLocaleString();
+                document.getElementById('tele-speed').textContent = speed.toLocaleString();
+                document.getElementById('tele-g').textContent = gForce.toFixed(1);
+                document.getElementById('tele-fuel').textContent = fuel;
+                document.getElementById('fuel-bar').style.width = fuel + '%';
+
+                // Update HUD
+                document.getElementById('altitude-hud').style.height = Math.min(100, (altitude / 1320000) * 100) + '%';
+                document.getElementById('altitude-value').textContent = altitude.toLocaleString() + ' ft';
+
+                document.getElementById('speed-hud').style.height = Math.min(100, (speed / 17500) * 100) + '%';
+                document.getElementById('speed-value').textContent = speed.toLocaleString() + ' mph';
+
+                document.getElementById('fuel-hud').style.height = fuel + '%';
+                document.getElementById('fuel-value').textContent = fuel + '%';
+
+                if (altitude >= 1320000) {
+                    clearInterval(telemetryInterval);
+                    showSuccess(altitude, speed);
+                }
+            }, 200);
+        }
+
+        function showSuccess(alt, spd) {
+            document.getElementById('final-alt').textContent = alt.toLocaleString() + ' ft';
+            document.getElementById('final-speed').textContent = spd.toLocaleString() + ' mph';
+            document.getElementById('success-modal').classList.add('active');
+        }
+
+        function abortLaunch() {
+            clearInterval(countdownInterval);
+            clearInterval(telemetryInterval);
+            document.getElementById('countdown-modal').classList.remove('active');
+            addTerminalLine(`[AI] 🛑 Fırlatma ABORT edildi.`, 'red');
+            addTerminalLine(`[AI] Sistem güvenli moda alındı, Operatör.`, 'yellow');
+            document.getElementById('spacecraft-status').textContent = 'ABORT EDİLDİ';
+            document.getElementById('spacecraft-status').className = 'text-red-400 font-bold';
+        }
+
+        
+        // PDF Export Function - Enhanced with 28 cities and region grouping
+        function generateFlightReportPDF() {
+            const { jsPDF } = window.jspdf;
+
+            // Create PDF
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4'
+            });
+
+            // Header
+            doc.setFontSize(22);
+            doc.setTextColor(0, 212, 255);
+            doc.text('TÜRK-PORT AI Command', 148, 15, { align: 'center' });
+
+            doc.setFontSize(16);
+            doc.setTextColor(255, 255, 255);
+            doc.text('UÇUŞ RİSK ANALİZ RAPORU - TÜRKİYE DENİZ KIYISI ÜSLERİ', 148, 25, { align: 'center' });
+
+            doc.setFontSize(10);
+            doc.setTextColor(150, 150, 150);
+            doc.text(`Rapor Tarihi: ${new Date().toLocaleString('tr-TR')} | Toplam Üs: 28 | Bölgeler: Akdeniz, Ege, Marmara, Karadeniz`, 148, 32, { align: 'center' });
+
+            // Line separator
+            doc.setDrawColor(0, 212, 255);
+            doc.setLineWidth(0.5);
+            doc.line(20, 35, 277, 35);
+
+            // Generate data for all cities grouped by region
+            const regions = ['Akdeniz', 'Ege', 'Marmara', 'Karadeniz'];
+            const regionColors = {
+                'Akdeniz': [255, 100, 100],    // Light red
+                'Ege': [100, 200, 255],        // Light blue
+                'Marmara': [200, 255, 100],   // Light green
+                'Karadeniz': [200, 150, 255]   // Light purple
+            };
+
+            let tableData = [];
+            let regionSummary = {};
+
+            regions.forEach(region => {
+                regionSummary[region] = { safe: 0, caution: 0, danger: 0, total: 0 };
+
+                Object.keys(cities).forEach(cityKey => {
+                    const city = cities[cityKey];
+                    if (city.region === region) {
+                        const weather = generateWeatherData(city)[0];
+
+                        let riskLevel = 'DÜŞÜK';
+                        let riskColor = [57, 255, 20];
+
+                        if (weather.wind > 25 || weather.rain > 60) {
+                            riskLevel = 'YÜKSEK';
+                            riskColor = [255, 0, 64];
+                            regionSummary[region].danger++;
+                        } else if (weather.wind > 20 || weather.rain > 40) {
+                            riskLevel = 'ORTA';
+                            riskColor = [255, 140, 0];
+                            regionSummary[region].caution++;
+                        } else {
+                            regionSummary[region].safe++;
+                        }
+
+                        regionSummary[region].total++;
+
+                        tableData.push([
+                            city.name,
+                            region,
+                            `${weather.temp}°C`,
+                            `${weather.wind} km/h`,
+                            `${weather.humidity}%`,
+                            `${weather.rain}%`,
+                            riskLevel
+                        ]);
+                    }
+                });
+            });
+
+            // Create table with region grouping
+            doc.autoTable({
+                startY: 40,
+                head: [['ŞEHİR', 'BÖLGE', 'SICAKLIK', 'RÜZGAR', 'NEM', 'YAĞIŞ', 'RİSK SEVİYESİ']],
+                body: tableData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [0, 100, 150],
+                    textColor: [255, 255, 255],
+                    fontSize: 10,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 9,
+                    textColor: [0, 0, 0]
+                },
+                columnStyles: {
+                    0: { cellWidth: 40, halign: 'left' },
+                    1: { cellWidth: 30, halign: 'center', fontStyle: 'bold' },
+                    2: { cellWidth: 25, halign: 'center' },
+                    3: { cellWidth: 30, halign: 'center' },
+                    4: { cellWidth: 25, halign: 'center' },
+                    5: { cellWidth: 25, halign: 'center' },
+                    6: { cellWidth: 35, halign: 'center', fontStyle: 'bold' }
+                },
+                alternateRowStyles: {
+                    fillColor: [245, 250, 255]
+                },
+                didDrawCell: function(data) {
+                    // Color code region cells
+                    if (data.column.index === 1 && data.cell.section === 'body') {
+                        const region = data.cell.raw;
+                        const color = regionColors[region] || [200, 200, 200];
+                        doc.setFillColor(color[0], color[1], color[2]);
+                        doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+                        doc.setTextColor(0, 0, 0);
+                        doc.text(region, data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2 + 3, { align: 'center' });
+                    }
+
+                    // Color code risk level cells
+                    if (data.column.index === 6 && data.cell.section === 'body') {
+                        const riskText = data.cell.raw;
+                        if (riskText === 'YÜKSEK') {
+                            doc.setFillColor(255, 150, 150);
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+                            doc.setTextColor(200, 0, 0);
+                            doc.text(riskText, data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2 + 3, { align: 'center' });
+                        } else if (riskText === 'ORTA') {
+                            doc.setFillColor(255, 220, 150);
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+                            doc.setTextColor(200, 100, 0);
+                            doc.text(riskText, data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2 + 3, { align: 'center' });
+                        } else {
+                            doc.setFillColor(150, 255, 150);
+                            doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
+                            doc.setTextColor(0, 150, 0);
+                            doc.text(riskText, data.cell.x + data.cell.width/2, data.cell.y + data.cell.height/2 + 3, { align: 'center' });
+                        }
+                    }
+                }
+            });
+
+            // Summary section
+            const finalY = doc.lastAutoTable.finalY + 15;
+
+            doc.setFontSize(14);
+            doc.setTextColor(0, 212, 255);
+            doc.text('BÖLGESEL RİSK ÖZETİ', 20, finalY);
+
+            // Region summary table
+            const summaryData = regions.map(region => [
+                region,
+                regionSummary[region].total.toString(),
+                regionSummary[region].safe.toString(),
+                regionSummary[region].caution.toString(),
+                regionSummary[region].danger.toString()
+            ]);
+
+            doc.autoTable({
+                startY: finalY + 5,
+                head: [['BÖLGE', 'TOPLAM ÜS', 'GÜVENLİ', 'DİKKAT', 'RİSKLİ']],
+                body: summaryData,
+                theme: 'grid',
+                headStyles: {
+                    fillColor: [50, 100, 150],
+                    textColor: [255, 255, 255],
+                    fontSize: 10,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 10,
+                    textColor: [0, 0, 0]
+                },
+                columnStyles: {
+                    0: { cellWidth: 50, halign: 'left', fontStyle: 'bold' },
+                    1: { cellWidth: 35, halign: 'center' },
+                    2: { cellWidth: 35, halign: 'center', fillColor: [200, 255, 200] },
+                    3: { cellWidth: 35, halign: 'center', fillColor: [255, 240, 200] },
+                    4: { cellWidth: 35, halign: 'center', fillColor: [255, 200, 200] }
+                },
+                margin: { left: 20 }
+            });
+
+            // Overall summary
+            const totalSafe = summaryData.reduce((sum, row) => sum + parseInt(row[2]), 0);
+            const totalCaution = summaryData.reduce((sum, row) => sum + parseInt(row[3]), 0);
+            const totalDanger = summaryData.reduce((sum, row) => sum + parseInt(row[4]), 0);
+
+            const summaryY = doc.lastAutoTable.finalY + 15;
+
+            doc.setFontSize(12);
+            doc.setTextColor(0, 212, 255);
+            doc.text('GENEL DEĞERLENDİRME', 20, summaryY);
+
+            doc.setFontSize(11);
+            doc.setTextColor(0, 150, 0);
+            doc.text(`✓ Güvenli Üsler: ${totalSafe}/28`, 20, summaryY + 10);
+            doc.setTextColor(200, 100, 0);
+            doc.text(`⚠ Dikkat Gereken: ${totalCaution}/28`, 20, summaryY + 18);
+            doc.setTextColor(200, 0, 0);
+            doc.text(`✗ Riskli Üsler: ${totalDanger}/28`, 20, summaryY + 26);
+
+            // Recommendations
+            doc.setFontSize(12);
+            doc.setTextColor(0, 212, 255);
+            doc.text('ÖNERİLER', 120, summaryY);
+
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+
+            let recY = summaryY + 10;
+            const recommendations = [];
+
+            if (totalDanger > 0) {
+                recommendations.push('• Yüksek riskli üslerde fırlatma ertelenmeli');
+            }
+            if (totalCaution > 0) {
+                recommendations.push('• Orta riskli üslerde ek önlem alınmalı');
+            }
+            if (regionSummary['Karadeniz'].danger > 0 || regionSummary['Karadeniz'].caution > 3) {
+                recommendations.push('• Karadeniz bölgesinde hava dalgalanmaları yüksek');
+            }
+            if (regionSummary['Akdeniz'].safe >= 3) {
+                recommendations.push('• Akdeniz bölgesi optimal fırlatma koşullarına sahip');
+            }
+            recommendations.push('• Düşük riskli üslerde normal operasyon devam edebilir');
+
+            recommendations.forEach((rec, index) => {
+                doc.text(rec, 120, recY + (index * 6));
+            });
+
+            // Legend
+            const legendY = 270;
+            doc.setFontSize(9);
+            doc.setTextColor(100, 100, 100);
+            doc.text('RENK KODLARI:', 20, legendY);
+            doc.setFillColor(150, 255, 150);
+            doc.rect(60, legendY - 4, 8, 6, 'F');
+            doc.text('DÜŞÜK RİSK', 72, legendY);
+            doc.setFillColor(255, 220, 150);
+            doc.rect(110, legendY - 4, 8, 6, 'F');
+            doc.text('ORTA RİSK', 122, legendY);
+            doc.setFillColor(255, 150, 150);
+            doc.rect(160, legendY - 4, 8, 6, 'F');
+            doc.text('YÜKSEK RİSK', 172, legendY);
+
+            // Footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150, 150, 150);
+                doc.text(`Sayfa ${i} / ${pageCount}`, 148, 200, { align: 'center' });
+                doc.text('TÜRK-PORT AI Command | TÜRKİYE UZAY AJANSI | SINIFLANDIRILMIŞ', 20, 200);
+            }
+
+            // Save PDF
+            const timestamp = new Date().toISOString().slice(0, 10);
+            doc.save(`TURKIYE_UCUS_RISK_RAPORU_28_US_${timestamp}.pdf`);
+
+            addTerminalLine(`[AI] PDF raporu başarıyla indirildi: TURKIYE_UCUS_RISK_RAPORU_28_US_${timestamp}.pdf`, 'green');
+            addTerminalLine(`[AI] Toplam 28 deniz kıyısı üssü raporlandı, Operatör.`, 'cyan');
+        }
+
+function resetSystem() {
+            document.getElementById('success-modal').classList.remove('active');
+
+            // Reset all values
+            document.getElementById('altitude-hud').style.height = '0%';
+            document.getElementById('altitude-value').textContent = '0 ft';
+            document.getElementById('speed-hud').style.height = '0%';
+            document.getElementById('speed-value').textContent = '0 mph';
+            document.getElementById('fuel-hud').style.height = '100%';
+            document.getElementById('fuel-value').textContent = '100%';
+            document.getElementById('temp-hud').style.height = '20%';
+            document.getElementById('temp-value').textContent = '70°F';
+
+            document.getElementById('tele-alt').textContent = '0';
+            document.getElementById('tele-speed').textContent = '0';
+            document.getElementById('tele-g').textContent = '1.0';
+            document.getElementById('tele-fuel').textContent = '100';
+            document.getElementById('tele-temp').textContent = '450';
+            document.getElementById('fuel-bar').style.width = '100%';
+
+            document.getElementById('spacecraft-status').textContent = 'BEKLEMEDE';
+            document.getElementById('spacecraft-status').className = 'text-green-400 font-bold';
+
+            addTerminalLine(`[AI] Sistem sıfırlandı. Yeni görev bekleniyor, Operatör.`, 'cyan');
+        }
+    
+        // ==========================================
+        // ADVANCED SECURITY & VISUAL FEATURES
+        // ==========================================
+
+        // Command Log System
+        const commandLog = [];
+        const MAX_LOG_ENTRIES = 100;
+
+        function logCommand(command, response) {
+            const entry = {
+                timestamp: new Date().toISOString(),
+                command: command,
+                response: response,
+                operator: 'Operatör',
+                sessionId: generateSessionId()
+            };
+            commandLog.push(entry);
+            if (commandLog.length > MAX_LOG_ENTRIES) {
+                commandLog.shift();
+            }
+            updateLogIndicator();
+        }
+
+        function generateSessionId() {
+            return 'SES-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+        }
+
+        function updateLogIndicator() {
+            const indicator = document.getElementById('log-indicator');
+            if (!indicator) return;
+            const recentLogs = commandLog.filter(log => {
+                const logTime = new Date(log.timestamp);
+                const now = new Date();
+                return (now - logTime) < 300000;
+            });
+            indicator.textContent = `LOG: ${recentLogs.length} kayıt (Son 5 dk)`;
+        }
+
+        function analyzeLast5Minutes() {
+            const fiveMinutesAgo = new Date(Date.now() - 300000);
+            const recentLogs = commandLog.filter(log => new Date(log.timestamp) > fiveMinutesAgo);
+            addTerminalLine(`[AI] Son 5 dakika kayıtları incelendi, Operatör.`, 'cyan');
+            addTerminalLine(`[AI] Toplam ${recentLogs.length} komut işlendi.`, 'green');
+            const errors = recentLogs.filter(log => 
+                log.response.includes('HATA') || 
+                log.response.includes('ERROR') || 
+                log.response.includes('motor')
+            );
+            if (errors.length > 0) {
+                addTerminalLine(`[AI] ⚠️ ${errors.length} hata/uyarı tespit edildi!`, 'red');
+                errors.forEach(err => {
+                    addTerminalLine(`[AI] - ${err.command}: ${err.response.substring(0, 50)}...`, 'yellow');
+                });
+            } else {
+                addTerminalLine(`[AI] ✅ Sistem stabil. Hata kaydı bulunamadı.`, 'green');
+            }
+            return recentLogs;
+        }
+
+        // Thermal / Night Vision Modes
+        let currentVisionMode = 'normal';
+
+        function toggleThermalMode() {
+            document.body.classList.remove('night-mode');
+            if (currentVisionMode === 'thermal') {
+                document.body.classList.remove('thermal-mode');
+                currentVisionMode = 'normal';
+                addTerminalLine(`[AI] Termal kamera modu devre dışı. Normal görüş aktif.`, 'cyan');
+            } else {
+                document.body.classList.add('thermal-mode');
+                currentVisionMode = 'thermal';
+                addTerminalLine(`[AI] 🔥 TERMAL KAMERA MODU AKTİF`, 'yellow');
+                addTerminalLine(`[AI] Isı haritalaması devreye alındı.`, 'yellow');
+            }
+        }
+
+        function toggleNightMode() {
+            document.body.classList.remove('thermal-mode');
+            if (currentVisionMode === 'night') {
+                document.body.classList.remove('night-mode');
+                currentVisionMode = 'normal';
+                addTerminalLine(`[AI] Gece görüş modu devre dışı. Normal görüş aktif.`, 'cyan');
+            } else {
+                document.body.classList.add('night-mode');
+                currentVisionMode = 'night';
+                addTerminalLine(`[AI] 🌙 GECE GÖRÜŞ MODU AKTİF`, 'green');
+                addTerminalLine(`[AI] Işık amplifikasyonu devreye alındı.`, 'green');
+            }
+        }
+
+        // Intrusion Detection System
+        let intrusionAttempts = 0;
+        const MAX_INTRUSION_ATTEMPTS = 3;
+
+        function simulateIntrusion() {
+            const alert = document.getElementById('intrusion-alert');
+            const ipElement = document.getElementById('intrusion-ip');
+            if (!alert || !ipElement) return;
+            const fakeIP = `192.168.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+            ipElement.textContent = `IP: ${fakeIP}`;
+            alert.classList.add('active');
+            addTerminalLine(`[SECURITY] ⚠️ YETKİSİZ ERİŞİM DENEMESİ ENGELLENDİ`, 'red');
+            addTerminalLine(`[SECURITY] Saldırgan IP: ${fakeIP}`, 'red');
+            addTerminalLine(`[SECURITY] Saldırı türü: Brute Force`, 'red');
+            intrusionAttempts++;
+            if (intrusionAttempts >= MAX_INTRUSION_ATTEMPTS) {
+                lockSystem();
+            }
+            setTimeout(() => {
+                alert.classList.remove('active');
+            }, 5000);
+        }
+
+        // Random intrusion simulation
+        setInterval(() => {
+            if (Math.random() < 0.1) {
+                simulateIntrusion();
+            }
+        }, 30000);
+
+        // Anti-Brute Force System Lock
+        let isSystemLocked = false;
+        let lockTimer = null;
+
+        function lockSystem() {
+            isSystemLocked = true;
+            const lockOverlay = document.getElementById('system-lock');
+            const timerElement = document.getElementById('lock-timer');
+            if (!lockOverlay || !timerElement) return;
+            lockOverlay.classList.add('active');
+            let seconds = 30;
+            timerElement.textContent = seconds;
+            addTerminalLine(`[SECURITY] 🚨 SİSTEM KİLİTLENDİ`, 'red');
+            addTerminalLine(`[SECURITY] Çok fazla hatalı giriş denemesi.`, 'red');
+            addTerminalLine(`[SECURITY] 30 saniye bekleyin...`, 'yellow');
+            lockTimer = setInterval(() => {
+                seconds--;
+                timerElement.textContent = seconds;
+                if (seconds <= 0) {
+                    clearInterval(lockTimer);
+                    unlockSystem();
+                }
+            }, 1000);
+        }
+
+        function unlockSystem() {
+            isSystemLocked = false;
+            intrusionAttempts = 0;
+            const lockOverlay = document.getElementById('system-lock');
+            if (lockOverlay) lockOverlay.classList.remove('active');
+            addTerminalLine(`[SECURITY] ✅ Sistem kilidi açıldı.`, 'green');
+        }
+
+        // 2FA Voice Verification
+        function startVoice2FA(callback) {
+            const overlay = document.getElementById('voice-2fa');
+            const statusElement = document.getElementById('voice-status');
+            if (!overlay || !statusElement) {
+                if (callback) callback();
+                return;
+            }
+            overlay.classList.add('active');
+            addTerminalLine(`[2FA] Ses imza doğrulaması başlatıldı...`, 'cyan');
+            setTimeout(() => {
+                statusElement.textContent = 'ANALİZ EDİLİYOR...';
+                statusElement.style.color = '#ff8c00';
+            }, 2000);
+            setTimeout(() => {
+                statusElement.textContent = '✅ ONAYLANDI';
+                statusElement.style.color = '#00ff41';
+                addTerminalLine(`[2FA] Operatör, ses imzanız onaylandı.`, 'green');
+                setTimeout(() => {
+                    overlay.classList.remove('active');
+                    if (callback) callback();
+                }, 1500);
+            }, 4000);
+        }
+
+        // Moon Phase Calculation (AYAP)
+        function calculateMoonPhase() {
+            const date = new Date();
+            let year = date.getFullYear();
+            let month = date.getMonth() + 1;
+            const day = date.getDate();
+            if (month < 3) {
+                year--;
+                month += 12;
+            }
+            const c = 365.25 * year;
+            const e = 30.6 * month;
+            let jd = c + e + day - 694039.09;
+            jd /= 29.5305882;
+            const b = parseInt(jd);
+            jd -= b;
+            const phase = Math.round(jd * 8) % 8;
+            const illumination = Math.round((1 - Math.cos((phase / 4) * Math.PI)) * 50);
+            const phases = [
+                { name: 'YENİ AY', shadow: '0%' },
+                { name: 'HİLAL', shadow: '25%' },
+                { name: 'İLK DÖRT', shadow: '50%' },
+                { name: 'HILAL', shadow: '75%' },
+                { name: 'DOLUNAY', shadow: '100%' },
+                { name: 'HILAL', shadow: '75%' },
+                { name: 'SON DÖRT', shadow: '50%' },
+                { name: 'HİLAL', shadow: '25%' }
+            ];
+            const currentPhase = phases[phase];
+            const moonText = document.getElementById('moon-phase-text');
+            const moonIllum = document.getElementById('moon-illumination');
+            const moonShadow = document.getElementById('moon-shadow');
+            if (moonText) moonText.textContent = currentPhase.name;
+            if (moonIllum) moonIllum.textContent = `%${illumination} Işık`;
+            if (moonShadow) {
+                const shadowWidth = ['0%', '25%', '50%', '75%', '100%', '75%', '50%', '25%'][phase];
+                moonShadow.style.width = shadowWidth;
+                moonShadow.style.left = phase > 4 ? '0' : 'auto';
+                moonShadow.style.right = phase > 4 ? 'auto' : '0';
+            }
+            return currentPhase;
+        }
+
+        setInterval(calculateMoonPhase, 3600000);
+
+        // Kernel Lockdown
+        function activateKernelLockdown() {
+            const lockdown = document.getElementById('kernel-lockdown');
+            if (lockdown) lockdown.classList.add('active');
+            document.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                addTerminalLine(`[KERNEL] ⚠️ Sağ tık engellendi.`, 'red');
+                return false;
+            });
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'F12' || 
+                    (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J')) ||
+                    (e.ctrlKey && e.key === 'U')) {
+                    e.preventDefault();
+                    addTerminalLine(`[KERNEL] ⚠️ Geliştirici araçları erişimi engellendi.`, 'red');
+                    return false;
+                }
+            });
+            setInterval(() => {
+                console.clear();
+                console.log('%c🔒 TÜRK-PORT AI Command - SINIFLANDIRILMIŞ', 'color: red; font-size: 20px; font-weight: bold;');
+                console.log('%cKaynak kod erişimi yasaktır.', 'color: red;');
+            }, 1000);
+        }
+
+        setTimeout(activateKernelLockdown, 2000);
+
+        // Initialize everything on load
+        document.addEventListener('DOMContentLoaded', () => {
+            calculateMoonPhase();
+            updateLogIndicator();
+        });
+    </script>
+
+    <!-- Intrusion Detection Alert -->
+    <div id="intrusion-alert" class="intrusion-alert">
+        <div class="flex items-center gap-3">
+            <i class="fas fa-exclamation-triangle text-2xl"></i>
+            <div>
+                <div class="font-bold text-sm">⚠️ UYARI: YETKİSİZ ERİŞİM DENEMESİ</div>
+                <div class="text-xs" id="intrusion-ip">IP: 192.168.1.XXX</div>
+                <div class="text-xs">Saldırı türü: Brute Force</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- System Lock Overlay -->
+    <div id="system-lock" class="system-lock">
+        <div class="text-6xl mb-4">🔒</div>
+        <h2 class="orbitron text-2xl text-red-400 mb-4">SİSTEM KİLİTLENDİ</h2>
+        <p class="text-gray-400 mb-4">Çok fazla hatalı giriş denemesi tespit edildi</p>
+        <div class="lock-timer" id="lock-timer">30</div>
+        <p class="text-gray-500 text-sm mt-4">saniye sonra tekrar deneyin</p>
+    </div>
+
+    <!-- Moon Phase Display (AYAP - Ay Araştırma Programı) -->
+    <div class="moon-phase-container">
+        <div class="moon-visual" id="moon-visual">
+            <div class="moon-shadow" id="moon-shadow"></div>
+        </div>
+        <div class="moon-label" id="moon-phase-text">AY FAZI</div>
+        <div class="text-xs text-gray-500" id="moon-illumination">%0 Işık</div>
+    </div>
+
+    <!-- 2FA Voice Verification Overlay -->
+    <div id="voice-2fa" class="voice-2fa-overlay">
+        <div class="glass-panel p-8 rounded-lg text-center max-w-md">
+            <div class="text-5xl mb-4">🎙️</div>
+            <h2 class="orbitron text-xl text-cyan-400 mb-4">SES İMZA DOĞRULAMA</h2>
+            <p class="text-gray-400 mb-6">Operatör, ses imzanız taranıyor...</p>
+            <div class="voice-wave mb-6" id="voice-wave">
+                <div class="voice-bar" style="animation-delay: 0s"></div>
+                <div class="voice-bar" style="animation-delay: 0.1s"></div>
+                <div class="voice-bar" style="animation-delay: 0.2s"></div>
+                <div class="voice-bar" style="animation-delay: 0.3s"></div>
+                <div class="voice-bar" style="animation-delay: 0.4s"></div>
+                <div class="voice-bar" style="animation-delay: 0.5s"></div>
+                <div class="voice-bar" style="animation-delay: 0.6s"></div>
+            </div>
+            <div id="voice-status" class="text-cyan-400 orbitron">TARANIYOR...</div>
+        </div>
+    </div>
+
+    <!-- Kernel Lockdown Warning -->
+    <div id="kernel-lockdown" class="kernel-lockdown">
+        🔒 KERNEL LOCKDOWN AKTİF - Kaynak kod koruması etkin
+    </div>
+
+    <!-- Log System Indicator -->
+    <div class="log-indicator recording" id="log-indicator">
+        LOG: Kayıt Aktif | Son 5 dk
+    </div>
+</body>
+</html>
+        // ==========================================
+        // ADVANCED SECURITY & VISUAL FEATURES
+        // ==========================================
+
+
+           
