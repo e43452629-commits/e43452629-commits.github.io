@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TÜRK-PORT AI Command | Stratejik Operasyon Merkezi</title>
+    <link rel="icon" type="image/png" href="favicon.png">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -631,30 +633,33 @@
 
     <!-- Main Container -->
     <div class="relative z-10 min-h-screen p-6">
+<header class="glass-panel rounded-lg p-8 mb-8 flex justify-between items-center border-l-4 border-cyan-500">
+    <div class="flex items-center gap-6">
+        <div class="w-24 h-24 border-2 border-cyan-400 rounded-xl flex items-center justify-center bg-white overflow-hidden shadow-[0_0_25px_rgba(34,211,238,0.3)] shrink-0">
+            <img src="logo.png" class="w-full h-full object-contain p-2" alt="Logo">
+        </div>
+        
+        <div>
+            <h1 class="orbitron text-3xl font-extrabold text-cyan-400 tracking-widest uppercase">
+                TÜRK-PORT AI Command
+            </h1>
+            <p class="text-base text-cyan-600 font-semibold mt-1 tracking-wider opacity-80">
+                STRATEJİK OPERASYON MERKEZİ v3.0
+            </p>
+        </div>
+    </div>
 
-        <!-- Header -->
-        <header class="glass-panel rounded-lg p-6 mb-6 flex justify-between items-center">
-            <div class="flex items-center gap-4">
-                <div class="w-14 h-14 border-2 border-cyan-400 rounded-lg flex items-center justify-center bg-cyan-900/20">
-                    <span class="orbitron text-2xl font-bold text-cyan-400">T</span>
-                </div>
-                <div>
-                    <h1 class="orbitron text-2xl font-bold text-cyan-400 tracking-wider">TÜRK-PORT AI Command</h1>
-                    <p class="text-sm text-cyan-600">STRATEJİK OPERASYON MERKEZİ v3.0</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-6">
-                <div class="text-right">
-                    <div id="clock" class="text-2xl font-bold text-cyan-400 orbitron">00:00:00</div>
-                    <div id="date" class="text-sm text-cyan-600">2026-03-28 UTC</div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <span class="status-dot status-green"></span>
-                    <span class="text-sm text-cyan-400 orbitron">ONLINE</span>
-                </div>
-            </div>
-        </header>
+    <div class="flex items-center gap-8">
+        <div class="text-right border-r-2 border-cyan-900/50 pr-6">
+            <div id="clock" class="text-3xl font-bold text-cyan-400 orbitron tabular-nums">00:00:00</div>
+            <div id="date" class="text-sm text-cyan-600 font-medium tracking-widest">2026-03-29 UTC</div>
+        </div>
+        <div class="flex flex-col items-center gap-2">
+            <span class="status-dot status-green animate-pulse"></span>
+            <span class="text-xs text-cyan-400 orbitron uppercase tracking-widest">System Online</span>
+        </div>
+    </div>
+</header>
 
         <!-- Map Section (%40) -->
         <section class="mb-6">
@@ -816,7 +821,6 @@
                         <div class="terminal-line text-cyan-400/70">• "Mersin'den uçuş başlat" - Fırlatma protokolü</div>
                         <div class="terminal-line text-cyan-400/70">• "Tüm şehirlerin hava durumu" - Genel rapor</div>
                         <div class="terminal-line text-cyan-400/70">• "Antalya uçuş raporu ver" - Şehir analizi</div>
-                        <div class="terminal-line text-cyan-400/70">• "Peugeot 3008 fiyatları" - Araç bilgisi</div>
                     </div>
                 </div>
 
@@ -830,9 +834,6 @@
                     </button>
                     <button onclick="quickCommand('Antalya uçuş raporu ver')" class="btn-neon w-full px-4 py-3 rounded text-left text-sm">
                         <i class="fas fa-map-marker-alt mr-2"></i>Uçuş Raporu
-                    </button>
-                    <button onclick="quickCommand('Peugeot 3008 fiyatları')" class="btn-neon w-full px-4 py-3 rounded text-left text-sm">
-                        <i class="fas fa-car mr-2"></i>Peugeot 3008
                     </button>
                     <button onclick="generateFlightReportPDF()" class="btn-neon w-full px-4 py-3 rounded text-left text-sm border-yellow-500 text-yellow-400 hover:bg-yellow-500/20">
                         <i class="fas fa-file-pdf mr-2"></i>PDF Rapor İndir
@@ -1148,8 +1149,7 @@
                 <div class="terminal-line text-cyan-400/70">• "Mersin'den uçuş başlat" - Fırlatma protokolü</div>
                 <div class="terminal-line text-cyan-400/70">• "Tüm şehirlerin hava durumu" - Genel rapor</div>
                 <div class="terminal-line text-cyan-400/70">• "Antalya uçuş raporu ver" - Şehir analizi</div>
-                <div class="terminal-line text-cyan-400/70">• "Peugeot 3008 fiyatları" - Araç bilgisi</div>
-            `;
+                `;
         }
 
         function handleKeyPress(event) {
@@ -1249,23 +1249,12 @@
                     }
                 }, 600);
             }
-
-            // Peugeot 3008
-            else if (lowerCmd.includes('peugeot') || lowerCmd.includes('3008')) {
-                addTerminalLine(`[AI] Peugeot 3008 Güncel Fiyat Analizi (Türkiye):`, 'cyan');
-                addTerminalLine(`[AI] 2025 Model Sıfır: ~2.600.000 TL`, 'green');
-                addTerminalLine(`[AI] 2024 Model 2. El: 1.500.000 - 2.100.000 TL`, 'green');
-                addTerminalLine(`[AI] 2023 Model 2. El: 1.300.000 - 1.800.000 TL`, 'green');
-                addTerminalLine(`[AI] Not: Fiyatlar donanım ve kilometreye göre değişir.`, 'yellow');
-            }
-
             // Help
             else if (lowerCmd.includes('yardım') || lowerCmd.includes('help')) {
                 addTerminalLine(`[AI] Mevcut komutlar, Operatör:`, 'cyan');
                 addTerminalLine(`[AI] • "Mersin'den uçuş başlat" - Fırlatma protokolü`, 'green');
                 addTerminalLine(`[AI] • "Tüm şehirlerin hava durumu" - Genel rapor`, 'green');
                 addTerminalLine(`[AI] • "Antalya uçuş raporu ver" - Şehir analizi`, 'green');
-                addTerminalLine(`[AI] • "Peugeot 3008 fiyatları" - Araç bilgisi`, 'green');
             }
 
             else {
@@ -1714,7 +1703,7 @@
                 doc.setFontSize(8);
                 doc.setTextColor(150, 150, 150);
                 doc.text(`Sayfa ${i} / ${pageCount}`, 148, 200, { align: 'center' });
-                doc.text('TÜRK-PORT AI Command | TÜRKİYE UZAY AJANSI | SINIFLANDIRILMIŞ', 20, 200);
+                doc.text('TÜRK-PORT AI Ultımate | TÜRKİYE UZAY AJANSI | SINIFLANDIRILMIŞ', 20, 200);
             }
 
             // Save PDF
@@ -1748,11 +1737,11 @@ function resetSystem() {
             document.getElementById('spacecraft-status').textContent = 'BEKLEMEDE';
             document.getElementById('spacecraft-status').className = 'text-green-400 font-bold';
 
-            addTerminalLine(`[AI] Sistem sıfırlandı. Yeni görev bekleniyor, Operatör.`, 'cyan');
+            addTerminalLine(`[AI] Sistem sıfırlandı. Yeni Uçuş Bekleniyor, Operatör.`, 'cyan');
         }
     
         // ==========================================
-        // ADVANCED SECURITY & VISUAL FEATURES
+        // GÖKSU SECURITY & VISUAL FEATURES
         // ==========================================
 
         // Command Log System
@@ -2065,11 +2054,15 @@ function resetSystem() {
     <!-- Log System Indicator -->
     <div class="log-indicator recording" id="log-indicator">
         LOG: Kayıt Aktif | Son 5 dk
-    </div>
+   
+        alert(sehirAdi + " koordinatları onaylandı. Mekik parçaları denize yönlendirilecek.");
+    }
+}
+</script>
 </body>
 </html>
         // ==========================================
-        // ADVANCED SECURITY & VISUAL FEATURES
+        // GÖKSU SECURITY & VISUAL FEATURES
         // ==========================================
 
 
